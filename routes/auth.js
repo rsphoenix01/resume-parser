@@ -4,8 +4,7 @@ const router = express.Router();
 
 // Hard-coded credentials for demo
 const validCredentials = {
-  username: 'roshan',
-  password: 'admin123'
+  username: "naval.ravikant", password : "05111974"
 };
 
 // POST /api/auth
