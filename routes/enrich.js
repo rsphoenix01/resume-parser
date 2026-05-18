@@ -41,7 +41,7 @@ router.post('/', verifyJWT, async (req, res, next) => {
     }
 
     // Extract text from the PDF using pdf-parse.
-    const buffer = await response.buffer();
+    const buffer = await response.arrayBuffer();
     const data = await pdfParse(buffer);
     const rawText = data.text.trim();
 
