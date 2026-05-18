@@ -34,6 +34,8 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
 });
 
+    
+
 // Export the app for Vercel
 module.exports = app;
 
