@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * @returns {Promise<Object>} - Structured resume data.
  */
 async function generateStructuredResume(rawText) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro-latest' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
   const prompt = `
     Extract the following fields from the resume text and output a valid JSON:
