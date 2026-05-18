@@ -1,61 +1,61 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require("@google/genai");
 
-// Initialize Gemini client with the API Key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
 
-/**
- * Generates structured resume data from raw text using Gemini API.
- * @param {string} rawText - The raw resume text.
- * @returns {Promise<Object>} - Structured resume data.
- */
 async function generateStructuredResume(rawText) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
   const prompt = `
-    Extract the following fields from the resume text and output a valid JSON:
-    {
-      "name": <name>,
-      "email": <email>,
-      "education": {
-        "degree": <degree>,
-        "branch": <branch>,
-        "institution": <institution>,
-        "year": <year>
-      },
-      "experience": {
-        "job_title": <job_title>,
-        "company": <company>,
-        "start_date": <start_date>,
-        "end_date": <end_date>
-      },
-      "skills": [<skill1>, <skill2>, ...],
-      "summary": <short summary of candidate profile>
-    }
-    Resume text: "${rawText}"
-  `;
+Extract structured data from the resume below.
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
+Return ONLY valid JSON. No explanation.
 
-  // Remove markdown code fences and extract the first JSON block
+{
+  "name": "",
+  "email": "",
+  "education": {
+    "degree": "",
+    "branch": "",
+    "institution": "",
+    "year": ""
+  },
+  "experience": {
+    "job_title": "",
+    "company": "",
+    "start_date": "",
+    "end_date": ""
+  },
+  "skills": [],
+  "summary": ""
+}
+
+Resume:
+${rawText}
+`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.1-pro-preview",
+    contents: prompt
+  });
+
+  const text = response.text;
+
+  if (!text) {
+    throw new Error("Empty response from Gemini");
+  }
+
   let cleanedText = text.trim();
-  const codeBlockRegex = /```(?:json)?\s*([\s\S]+?)\s*```/g;
-  const matches = [];
-  let match;
-  while ((match = codeBlockRegex.exec(cleanedText)) !== null) {
-    matches.push(match[1]);
+
+  const match = cleanedText.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+  if (match) {
+    cleanedText = match[1].trim();
   }
-  if (matches.length > 0) {
-    // Use the first code block found
-    cleanedText = matches[0].trim();
-  }
-  
+
   try {
     return JSON.parse(cleanedText);
   } catch (error) {
-    console.error('Failed to parse Gemini response:', cleanedText);
-    throw new Error('Invalid JSON format from Gemini');
+    console.error("Failed to parse Gemini response:", cleanedText);
+    throw new Error("Invalid JSON format from Gemini");
   }
 }
 
